@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ARO Robotic Systems </title>
+    <link rel="stylesheet" href="style/bootstrap.min.css" />
+    <link rel="stylesheet" href="style/svg.css" />
+    <script src="script/jquery.slim.min.js"></script>
+    <script src="script/popper.min.js"></script>
+    <script src="script/bootstrap.bundle.min.js"></script>
+
+
+    <!-- <link rel="stylesheet" href="bootstrap-icons.min.css"> -->
+    <style>
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 15px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: 0.2s;
+            transition: opacity 0.2s;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #04aa6d;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #04aa6d;
+            cursor: pointer;
+        }
+
+
+        .slider2 {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 15px;
+            border-radius: 5px;
+            background: #f7c7c7;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: 0.2s;
+            transition: opacity 0.2s;
+        }
+
+        .slider2::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #4423ffd8;
+            cursor: pointer;
+        }
+
+        .slider2::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #4423ffd8;
+            cursor: pointer;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            background-color: #eeffef;
+            /* Prevents header from becoming transparent */
+            z-index: 100;
+            /* Ensures the header stays on top of other content */
+        }
+    </style>
+    <script src="script/roslib.min.js"></script>
+    <script src="menu.js"></script>
+
+</head>
+
+<body>
+    <div id="app" class="container mt-4">
+        <div class="row">
+            <div class="col-md-3 ">
+                <div class="card">
+                    <div class="card-header">
+
+                        <b>ARO Robotic Systems</b>
+                    </div>
+                    <div class="card-body">
+                        <h5>ROSBridge & Vue Js</h5>
+                        <label>ROSBridge address</label>
+                        <br />
+                        <input type="text" v-model="rosbridge_address" class="form-control"
+                            value="ws://127.0.0.1:9090/" />
+
+
+                        <button class="mt-2 btn btn-success" v-if="connected" @click="disconnect">Connected!</button>
+                        <button class="mt-2 btn btn-primary" v-else @click="connect">Connect!</button>
+                        <div class="font-weight-light mt-1">
+                            <div style="color: #ff0000;" v-show="error">Error in the backend!</div>
+                            <div v-show="!connected">Connection closed.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mt-2 mb-2">
+                    <div class="card-header">
+                        <b>Menu</b>
+                    </div>
+                    <div class="card-body">
+                        <label class="btn btn-link" @click="config=true ">Make Operations</label>
+                        <label class="btn btn-link" @click="config=false">Run Operations</label>
+                    </div>
+                </div>
+
+                <div class="card mt-2 mb-2">
+                    <div class="card-header">
+                        <b>Current Positions </b>
+                    </div>
+                    <div class="card-body">
+                        <!-- <span id="publisher"></span> -->
+                        <ul>
+                            <li v-for="(x,index) in cposition">{{index}}: {{x.toFixed(2)}} °</li>
+                        </ul>
+                        <!-- {{cposition}} -->
+
+                        <hr>
+                        <ul>
+                            <li v-for="(x,index) in cpositionxyz">{{index}}: {{x.toFixed(2)}} m </li>
+                        </ul>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-9 m-0 p-0">
+                <!-- actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <b> Categories </b>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+
+
+
+                            <div class="input-group mt-2 col-md-12">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Title:</span>
+                                </div>
+                                <input class=" form-control " placeholder="Enter Category Title" required id="catTitle1"
+                                    v-model="catTitle" />
+
+                            </div>
+
+
+                            <div class="col-md-7 text-right">
+                                <button class="mt-2 btn btn-success ml-1" @click="showData" v-if="config"> Show Data
+                                </button>
+                                <button class="mt-2 btn btn-info ml-1" @click="saveWorkspace" v-if="config"> Save to
+                                    File </button>
+                                <button class="mt-2 btn btn-primary ml-1"
+                                    onclick="document.getElementById('file-input').click()">Open Form File</button>
+                                <button class="mt-2 btn btn-info ml-1" v-if="!config & catTitle!=null"
+                                    @click="AddToCatList">Add To List </button>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div v-if="config">
+                    <div class="card mt-2">
+                        <div class=" card-header">
+                            <b> <a data-toggle="collapse" data-parent="#cardOperations"
+                                    href="#cardOperations">Operations</a> </b>
+                            <!-- <button  data-toggle="collapse" data-target="#demo">Simple collapsible</button> -->
+                        </div>
+
+                        <div class=" card-body" id="cardOperations">
+
+                            <div class="row">
+                                <div class="col-md-9 m-0 p-0">
+                                    <div class="card">
+                                        <div class="card card-header">
+                                            <div class="row">
+
+                                                <div class="col-md-6 col-sm-8">
+                                                    <b>Set Position <sup>(Degree & Meter)</sup> </b>
+                                                </div>
+                                                <div class="col-md-6 col-sm-8 text-right">
+
+                                                    <button @click="currentPosition"
+                                                        class="btn btn-sm   btn-success ml-2 Icon32 resetIcon">
+                                                    </button>
+                                                    <button class="btn btn-sm  btn-primary ml-2 Icon32 keyboardIcon"
+                                                        v-on:keydown="getKey" data-toggle="modal"
+                                                        data-target="#myModalkeyboardrun" title="Active Keyboard"
+                                                        @click="Jogging_Command(0)">
+                                                    </button>
+                                                    <button class="btn btn-sm  btn-danger ml-2 Icon32 joystickIcon"
+                                                        v-on:keydown="getKey" data-toggle="modal"
+                                                        data-target="#myModalkeyboardrun2" title="Active Keyboard"
+                                                        @click="Jogging_Command(1)">
+                                                    </button>
+                                                    <button class="btn btn-sm  btn-info ml-2 Icon32 helpIcon"
+                                                        data-toggle="modal" data-target="#myModalkeyboard">
+
+
+                                                    </button>
+
+
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card card-body">
+
+                                            
+                                            <ul class="nav nav-tabs" role="tablist">
+                                                <li class="nav-item">
+                                                    <a class="nav-link font-weight-bold text-dark active" @click="catresian=false"
+                                                    data-toggle="tab" href="#angle">Angle</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link font-weight-bold text-dark" @click="catresian=true" data-toggle="tab"
+                                                    href="#cartesian">Cartesian Coordinates</a>
+                                                </li>
+                                                
+                                            </ul>
+                                            
+                                            <div class="container ">
+
+
+                                                <div class="tab-content">
+                                                    <div id="angle" class="container tab-pane active"><br>
+                                                        <!-- <h3>Angles</h3> -->
+
+                                                        <div class="row">
+                                                            <div class="input-group mb-2">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text"
+                                                                        id="basic-addon1">Joint
+                                                                        1:</span>
+                                                                </div>
+                                                                <input class="col-md-2 form-control" v-model="j1"
+                                                                    max="180" min="-180" type="number" />
+                                                                <div class="col-md-8">
+                                                                    <input type="range" min="-180" v-model="j1"
+                                                                        max="180" class="slider mt-2" />
+                                                                </div>
+                                                            </div>
+
+
+                                                            <div class="input-group mb-2">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text"
+                                                                        id="basic-addon1">Joint
+                                                                        2:</span>
+                                                                </div>
+                                                                <input class="col-md-2 form-control" v-model="j2"
+                                                                    max="180" min="-180" type="number" />
+                                                                <div class="col-md-8">
+                                                                    <input type="range" min="-180" v-model="j2"
+                                                                        max="180" value="0" class="slider mt-2" />
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="input-group mb-2">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text"
+                                                                        id="basic-addon1">Joint
+                                                                        3:</span>
+                                                                </div>
+                                                                <input class="col-md-2 form-control" v-model="j3"
+                                                                    max="180" min="-180" type="number" />
+                                                                <div class="col-md-8">
+                                                                    <input type="range" min="-180" v-model="j3"
+                                                                        max="180" value="0" class="slider mt-2" />
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="input-group mb-2">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text"
+                                                                        id="basic-addon1">Joint
+                                                                        4:</span>
+                                                                </div>
+                                                                <input class="col-md-2 form-control" v-model="j4"
+                                                                    max="180" min="-180" type="number" />
+                                                                <div class="col-md-8">
+                                                                    <input type="range" min="-180" v-model="j4"
+                                                                        max="180" value="0" class="slider mt-2" />
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="input-group mb-2">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text"
+                                                                        id="basic-addon1">Joint
+                                                                        5:</span>
+                                                                </div>
+                                                                <input class="col-md-2 form-control" v-model="j5"
+                                                                    max="180" min="-180" type="number" />
+                                                                <div class="col-md-8">
+                                                                    <input type="range" min="-180" v-model="j5"
+                                                                        max="180" value="0" class="slider mt-2" />
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="input-group mb-2">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text"
+                                                                        id="basic-addon1">Joint
+                                                                        6:</span>
+                                                                </div>
+                                                                <input class="col-md-2 form-control" v-model="j6"
+                                                                    max="180" min="-180" type="number" />
+                                                                <div class="col-md-8">
+                                                                    <input type="range" min="-180" v-model="j6"
+                                                                        max="180" value="0" class="slider mt-2" />
+                                                                </div>
+                                                            </div>
+
+
+
+                                                        </div>
+                                                    </div>
+                                                    <div id="cartesian" class="container tab-pane fade"><br>
+                                                        <!-- <h3>Menu 1</h3> -->
+                                                        <div class="row text-left">
+                                                            <div class="input-group mb-2">
+                                                                <div class="input-group  ">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text">Axis X:</span>
+                                                                    </div>
+                                                                    <input class="form-control mr-1" v-model="Axisx"
+                                                                        value="0.0" type="number" step="0.01" />m
+
+                                                                </div>
+                                                            </div>
+                                                            <div class="input-group mb-2">
+                                                                <div class="input-group  ">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text">Axis Y:</span>
+                                                                    </div>
+                                                                    <input class="form-control mr-1" v-model="Axisy"
+                                                                        type="number" step="0.01" />m
+
+                                                                </div>
+                                                            </div>
+                                                            <div class="input-group">
+                                                                <div class="input-group  ">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text">Axis Z:</span>
+                                                                    </div>
+                                                                    <input class="form-control mr-1" v-model="Axisz"
+                                                                        type="number" step="0.01" />m
+
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+
+
+                                            <hr>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Speed:</span>
+                                                </div>
+                                                <input class="col-md-2 form-control" v-model="speed" max="100" min="1"
+                                                    type="number" />
+                                                <div class="col-md-8">
+                                                    <input type="range" min="1" v-model="speed" max="100"
+                                                        class="slider2 mt-2" />
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-md-8 col-sm-12">
+                                                    <div class="input-group  ">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Title:</span>
+                                                        </div>
+                                                        <input class="form-control mr-1" v-model="title" />
+
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <div class="card card-footer">
+
+                                            <div class="row">
+                                                <div class="col-md-6 col-sm-6">
+
+                                                    <button class="btn btn-success " @click="addPosition">Add
+                                                        Position</button>
+
+
+                                                </div>
+                                                <!-- <div class="col-md-4"></div> -->
+                                                <div class="col-md-6 col-sm-6 text-right">
+                                                    <button class=" btn btn-primary" @click="send" v-show="connected">
+                                                        Move </button>
+                                                    <button class=" btn btn-danger ml-1" @click="Stop"
+                                                        v-show="connected"> Stop </button>
+
+                                                    <!-- <button class="mt-2 btn btn-success "  @click="Disengage"> Disengage
+                                                Brake </button> -->
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mr-0 pr-0">
+                                    <div class="row">
+
+
+                                        <div class="col-md-12">
+                                            <div class="card">
+                                                <div class="card card-header"><b>LED</b></div>
+                                                <div class="card card-body pt-1 pb-1">
+
+                                                    <div class="input-group ">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Reapet:</span>
+                                                        </div>
+                                                        <input class=" form-control" min="1" max="100" type="number"
+                                                            v-model="blink" />
+
+                                                    </div>
+                                                </div>
+                                                <!-- <div class="card card-footer">footer</div> -->
+                                                <div class="card card-footer">
+                                                    <button class="btn btn-success" @click="addBlink"> ADD
+                                                        Blink</button>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 mt-1">
+                                            <div class="card">
+                                                <div class="card card-header"><b>Buzzer</b></div>
+                                                <div class="card card-body pt-1 pb-1">
+
+                                                    <div class="input-group ">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Reapet:</span>
+                                                        </div>
+                                                        <input class=" form-control" min="1" max="100" type="number"
+                                                            v-model="buzz" />
+
+                                                    </div>
+                                                </div>
+                                                <div class="card card-footer">
+                                                    <button class="btn btn-success" @click="addBuzz"> ADD Beep</button>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 mt-1">
+                                            <div class="card">
+                                                <div class="card card-header"><b>Actuator</b></div>
+                                                <div class="card card-body pt-1 pb-1">
+                                                    <select v-model="actuatorName" class=" form-control ">
+                                                        <option value="" selected disabled>Select Action</option>
+                                                        <option v-for="item in actionList" v-bind:value="item.name">
+                                                            {{ item.name }}
+                                                        </option>
+                                                    </select>
+
+
+                                                    <label>
+                                                        <select required class=" form-control mt-1"
+                                                            v-for="item in actionList" v-model="actionName"
+                                                            v-show="item.name===actuatorName">
+                                                            <option value="" selected disabled>Select item</option>
+                                                            <option v-for="act in item.actions" v-bind:value="act">
+                                                                {{ act.action }}
+                                                            </option>
+                                                        </select>
+                                                    </label>
+                                                </div>
+                                                <div class="card card-footer">
+                                                    <button v-show="actionName" class="btn btn-success"
+                                                        @click="addHandAction"> ADD
+                                                        Action</button>
+
+                                                </div>
+
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+                    </div>
+
+                    <div class="card mt-2">
+                        <div class="card card-header ">
+                            <b> <a data-toggle="collapse" data-parent="#cardList" href="#cardList">Operations List</a>
+                            </b>
+                        </div>
+                        <div id="cardList">
+
+
+                            <div class="card card-body">
+
+                                <!-- <div class="table-responsive" style="max-height: 50vh;">
+
+
+                            <table id="storedata" data-pagination="true" data-search="true" data-show-toggle="true"
+                                data-toolbar=".toolbar" data-use-row-attr-func="true" data-reorderable-rows="true"
+                                class="table table-nowrap table-sm text-center table-striped ">
+                                <thead>
+
+                                    <tr>
+
+                                        <th>index</th>
+                                        <th>title</th>
+                                        <th>Joint 1</th>
+                                        <th>joint 2</th>
+                                        <th>joint 3</th>
+                                        <th>joint 4</th>
+                                        <th>joint 5</th>
+                                        <th>joint 6</th>
+                                        <th>speed</th>
+                                        <th>delay</th>
+                                        <th>Delete</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    <tr draggable="true" ondragstart="start()" ondragover="dragover()"
+                                        v-for="(x,index) in store">
+                                        <th>{{index+1}}</td>
+                                        <td>{{x.title}}</td>
+                                        <td>{{x.joint1}}</td>
+                                        <td>{{x.joint2}}</td>
+                                        <td>{{x.joint3}}</td>
+                                        <td>{{x.joint4}}</td>
+                                        <td>{{x.joint5}}</td>
+                                        <td>{{x.joint6}}</td>
+                                        <td>{{x.speed}}</td>
+                                        <td>{{x.delay}}</td>
+                                        <td>
+                                            <button @click="Delete(index)" class="btn btn-sm btn-danger"><svg
+                                                    xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                    fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                                                    <path
+                                                        d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+                                                </svg></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                              
+
+                            </table>
+
+                        </div> -->
+
+                                <div class="table-responsive" style="max-height: 80vh;">
+
+
+                                    <table id="storedata" data-pagination="true" data-search="true"
+                                        data-show-toggle="true" data-toolbar=".toolbar" data-use-row-attr-func="true"
+                                        data-reorderable-rows="true"
+                                        class="table table-nowrap table-sm text-center table-striped ">
+                                        <thead>
+
+                                            <tr>
+
+                                                <th>index</th>
+                                                <th>title</th>
+                                                <th>Data</th>
+                                                <th>delete</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            <tr draggable="true" ondragstart="start()"
+                                                ondragover="dragover('storedata')" v-for="(x,index) in store">
+                                                <td>{{index+1}}</td>
+                                                <td>{{x.type}}</td>
+                                                <td v-if="x.type == 'Arm Angles'">
+
+                                                    <table id="nestedtable">
+                                                        <tr draggable="false">
+
+                                                            <th>Title</th>
+                                                            <th>Joint1</th>
+                                                            <th>Joint2</th>
+                                                            <th>Joint3</th>
+                                                            <th>Joint4</th>
+                                                            <th>Joint5</th>
+                                                            <th>Joint6</th>
+                                                            <th>Speed</th>
+                                                            <!-- <th>Delay</th> -->
+                                                        </tr>
+                                                        <tr draggable="false">
+                                                            <td>{{x.value.title}}</td>
+                                                            <td>{{x.value.joint1}}</td>
+                                                            <td>{{x.value.joint2}}</td>
+                                                            <td>{{x.value.joint3}}</td>
+                                                            <td>{{x.value.joint4}}</td>
+                                                            <td>{{x.value.joint5}}</td>
+                                                            <td>{{x.value.joint6}}</td>
+                                                            <td>{{x.value.speed}}</td>
+                                                        </tr>
+                                                    </table>
+
+
+                                                </td>
+                                                <td v-if="x.type == 'Arm Coordinates'">
+
+                                                    <table id="nestedtable">
+                                                        <tr draggable="false">
+
+                                                            <th>Title</th>
+                                                            <th>Axis X</th>
+                                                            <th>Axis Y</th>
+                                                            <th>Axis Z</th>
+                                                            <th>Speed</th>
+                                                        </tr>
+                                                        <tr draggable="false">
+                                                            <td>{{x.value.title}}</td>
+                                                            <td>{{x.value.Axisx}}</td>
+                                                            <td>{{x.value.Axisy}}</td>
+                                                            <td>{{x.value.Axisz}}</td>
+                                                            <td>{{x.value.speed}}</td>
+                                                        </tr>
+                                                    </table>
+
+
+                                                </td>
+
+                                                <td v-if="x.type == 'LED'">
+                                                    {{x.value.reapet}}
+
+                                                </td>
+
+                                                <td v-if="x.type == 'Buzzer'">
+                                                    {{x.value.reapet}}
+
+                                                </td>
+                                                <td v-if="x.type == 'Hand'">
+                                                    {{x.value.actuator}} - {{x.value.action}}
+
+                                                </td>
+                                                <td>
+                                                    <!-- @click="Delete(index)" -->
+                                                    <button
+                                                        onclick="deleteActiveRow(this,'storedata')"
+                                                        class="btn btn-sm btn-danger Icon32 deleteIcon"></button>
+                                                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+
+                                                    <button onclick="UpButton(this,'storedata')"
+                                                        class="btn btn-sm btn-info  Icon32 upIcon"></button>
+                                                    <span>&nbsp;&nbsp;</span>
+                                                    <button onclick="DownButton(this,'storedata')"
+                                                        class="btn btn-sm btn-info  Icon32 downIcon">
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+
+
+                                    </table>
+
+                                </div>
+
+
+                            </div>
+                            <div class="card card-footer">
+                                <div class="row">
+                                    <div class="col-md-6 ">
+
+                                        <button class="btn btn-success col-md-4" @click="docycle" v-show="connected">
+                                            RUN </button>
+
+                                    </div>
+                                    <div class="col-md-6 text-right">
+
+                                        <button class="btn btn-warning col-md-4" @click="clearPositions"> Clear
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- <div class="card mt-2 mb-2">
+                        <div class="card card-header"> <b> <a data-toggle="collapse" data-parent="#cardHistory"
+                                    href="#cardHistory">History</a> </b>
+                        </div>
+                        <div id="cardHistory">
+                            <div class="card card-body">
+
+
+                                <div class="table-responsive" style="max-height: 26vh;">
+
+                                    <table ref="table" id="history"
+                                        class="table table-nowrap table-sm text-center table-striped ">
+                                        <thead>
+
+                                            <tr>
+
+                                                <th>index</th>
+                                                <th>Joint 1</th>
+                                                <th>joint 2</th>
+                                                <th>joint 3</th>
+                                                <th>joint 4</th>
+                                                <th>joint 5</th>
+                                                <th>joint 6</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            <tr v-for="(x,index) in history">
+                                                <th>{{index+1}}</td>
+                                                <td>{{x.joint1}}</td>
+                                                <td>{{x.joint2}}</td>
+                                                <td>{{x.joint3}}</td>
+                                                <td>{{x.joint4}}</td>
+                                                <td>{{x.joint5}}</td>
+                                                <td>{{x.joint6}}</td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th scope="row" colspan="2">Count</th>
+                                                <td>{{history.length }}</td>
+                                            </tr>
+                                        </tfoot>
+
+
+                                    </table>
+                                </div>
+
+
+                            </div>
+                            <div class="card card-footer">
+                                <button class="btn btn-warning  col-md-2" @click="clearHistory">Clear</button>
+                            </div>
+                        </div>
+                    </div> -->
+
+                </div>
+
+
+
+                <div class="mt-2" v-if="!config">
+                    <!-- actions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <b> Categories </b>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+
+                                <table id="cattable" data-pagination="true" data-search="true" data-show-toggle="true"
+                                    data-toolbar=".toolbar" data-use-row-attr-func="true" data-reorderable-rows="true"
+                                    class="table table-nowrap table-sm text-center table-striped ">
+                                    <thead>
+
+                                        <tr>
+
+                                            <th>Index</th>
+                                            <th>Name</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        <tr draggable="true" ondragstart="start()" ondragover="dragover2('cattable')"
+                                            v-for="(x,index) in catList">
+                                            <th>{{index+1}}</td>
+
+                                            <th>
+                                                {{x.name}}</td>
+                                            <td>
+
+
+                                                <button @click="DeleteFromCatList(index)"
+                                                    class="btn btn-sm btn-danger Icon32 deleteIcon"></button>
+
+                                                <button data-name="action" data-toggle="modal" data-target="#myModal"
+                                                    @click="modal(x.name)"
+                                                    class="callModal btn btn-sm btn-info ml-1 Icon32 listIcon"></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+
+
+                                </table>
+
+
+                            </div>
+                        </div>
+                        <div class="card card-footer">
+                            <button class="btn btn-success col-md-2" @click="doOperations" v-show="connected"> RUN
+                            </button>
+
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-sm-6 text-center">
+                        <div id="divCamera"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade row" id="myModal" v-bind:onload="modal">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h4 class="modal-title">List of Operations</h4>
+                        <button type="button" class="close" data-dismiss="modal">×</button>
+                    </div>
+
+                    <!-- Modal body -->
+                    <div class="modal-body">
+                        <div class=" text-center">
+                            <table class="table table-nowrap table-sm text-center table-striped table-responsive">
+                                <thead>
+
+                                    <tr>
+
+                                        <th>index</th>
+                                        <th>title</th>
+                                        <th>Data</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    <tr v-for="(x,index) in store">
+                                        <td>{{index+1}}</td>
+                                        <td>{{x.type}}</td>
+                                        <td v-if="x.type == 'Arm Angles'">
+
+                                            <table id="nestedtable">
+                                                <tr draggable="false">
+
+                                                    <th>Title</th>
+                                                    <th>Joint1</th>
+                                                    <th>Joint2</th>
+                                                    <th>Joint3</th>
+                                                    <th>Joint4</th>
+                                                    <th>Joint5</th>
+                                                    <th>Joint6</th>
+                                                    <th>Speed</th>
+                                                    <!-- <th>Delay</th> -->
+                                                </tr>
+                                                <tr draggable="false">
+                                                    <td>{{x.value.title}}</td>
+                                                    <td>{{x.value.joint1}}°</td>
+                                                    <td>{{x.value.joint2}}°</td>
+                                                    <td>{{x.value.joint3}}°</td>
+                                                    <td>{{x.value.joint4}}°</td>
+                                                    <td>{{x.value.joint5}}°</td>
+                                                    <td>{{x.value.joint6}}°</td>
+                                                    <td>{{x.value.speed}}</td>
+                                                    <!-- <td>{{x.value.delay}}</td> -->
+                                                </tr>
+                                            </table>
+
+
+                                        </td>
+                                        <td v-if="x.type == 'Arm Coordinates'">
+
+                                            <table id="nestedtable">
+                                                <tr draggable="false">
+
+                                                    <th>Title</th>
+                                                    <th>Axis X</th>
+                                                    <th>Axis Y</th>
+                                                    <th>Axis Z</th>
+                                                    <th>Speed</th>
+                                                </tr>
+                                                <tr draggable="false">
+                                                    <td>{{x.value.title}}</td>
+                                                    <td>{{x.value.Axisx}} m</td>
+                                                    <td>{{x.value.Axisy}} m</td>
+                                                    <td>{{x.value.Axisz}} m</td>
+                                                    <td>{{x.value.speed}}</td>
+                                                </tr>
+                                            </table>
+
+
+                                        </td>
+                                        <td v-if="x.type == 'LED'">
+                                            {{x.value.reapet}}
+
+                                        </td>
+
+                                        <td v-if="x.type == 'Buzzer'">
+                                            {{x.value.reapet}}
+
+                                        </td>
+                                        <td v-if="x.type == 'Hand'">
+                                            {{x.value.action}}
+
+                                        </td>
+
+                                    </tr>
+                                </tbody>
+
+
+                            </table>
+                        </div>
+
+
+
+                    </div>
+
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="modal fade row" id="myModalkeyboard">
+            <div class="modal-dialog modal-md">
+                <div class="modal-content">
+
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h4 class="modal-title">Keyboard Help</h4>
+                        <button type="button" class="close" data-dismiss="modal">×</button>
+                    </div>
+
+                    <!-- Modal body -->
+                    <div class="modal-body">
+                        <div class=" text-center">
+                            <h4>* To set the current positions, click on the <svg xmlns="http://www.w3.org/2000/svg"
+                                    width="20" height="20" fill="currentColor" class="bi bi-r-circle"
+                                    viewBox="0 0 16 16">
+                                    <path
+                                        d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8m15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.5 4.002h3.11c1.71 0 2.741.973 2.741 2.46 0 1.138-.667 1.94-1.495 2.24L11.5 12H9.98L8.52 8.924H6.836V12H5.5zm1.335 1.09v2.777h1.549c.995 0 1.573-.463 1.573-1.36 0-.913-.596-1.417-1.537-1.417z" />
+                                </svg>
+                                button
+                            </h4>
+
+                            <h4>
+                                * Click on the <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                    fill="currentColor" class="bi bi-keyboard" viewBox="0 0 16 16">
+                                    <path
+                                        d="M14 5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM2 4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" />
+                                    <path
+                                        d="M13 10.25a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25zm0-2a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25zm-5 0A.25.25 0 0 1 8.25 8h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 8 8.75zm2 0a.25.25 0 0 1 .25-.25h1.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-1.5a.25.25 0 0 1-.25-.25zm1 2a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25zm-5-2A.25.25 0 0 1 6.25 8h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 6 8.75zm-2 0A.25.25 0 0 1 4.25 8h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 4 8.75zm-2 0A.25.25 0 0 1 2.25 8h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 2 8.75zm11-2a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25zm-2 0a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25zm-2 0A.25.25 0 0 1 9.25 6h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 9 6.75zm-2 0A.25.25 0 0 1 7.25 6h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 7 6.75zm-2 0A.25.25 0 0 1 5.25 6h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 5 6.75zm-3 0A.25.25 0 0 1 2.25 6h1.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-1.5A.25.25 0 0 1 2 6.75zm0 4a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25zm2 0a.25.25 0 0 1 .25-.25h5.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-5.5a.25.25 0 0 1-.25-.25z" />
+                                </svg> button and press the following keys to move the ARM
+                            </h4>
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Joint</th>
+                                        <th>Clockwise</th>
+                                        <th>Counterclockwise</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Joint 1</td>
+                                        <td>x</td>
+                                        <td>z</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Joint 2</td>
+                                        <td>s</td>
+                                        <td>a</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Joint 3</td>
+                                        <td>w</td>
+                                        <td>q</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Joint 4</td>
+                                        <td>m</td>
+                                        <td>n</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Joint 5</td>
+                                        <td>l</td>
+                                        <td>k</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Joint 6</td>
+                                        <td>p</td>
+                                        <td>o</td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade row" id="myModalkeyboardrun">
+            <div class="modal-dialog modal-md">
+                <div class="modal-content">
+
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h4 class="modal-title">Move</h4>
+                        <button type="button" class="close" data-dismiss="modal">×</button>
+                    </div>
+
+                    <!-- Modal body -->
+                    <div class="modal-body" v-on:keydown="getKey">
+                        <div class=" text-center">
+
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <strong>Speed: {{keyboardSpeed*100}}</strong>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="range" min="0.01" v-model="keyboardSpeed" max="1" value="0.5"
+                                        class="slider mt-2" step="0.01" />
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row text-center ">
+                                <div class="col-md-4">
+                                    <strong>Z</strong>
+                                    <button @click="keyValue='z'; moveByKey()"
+                                        class="border no-border btn btn-warning  Icon64  counterclockwiseIcon ml-2">
+                                    </button>
+
+
+                                </div>
+
+                                <div class="col-md-4 mt-1">
+                                    <strong>Joint 1</strong>
+                                    <br>
+                                    <span>{{cposition.Joint1.toFixed(2)}} °</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <button @click="keyValue='x'; moveByKey()"
+                                        class="border no-border btn btn-danger Icon64  clockwiseIcon mr-2"></button>
+
+                                    <strong>X</strong>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <strong>A</strong>
+                                    <button @click="keyValue='a'; moveByKey()"
+                                        class="border no-border btn btn-warning  Icon64  counterclockwiseIcon ml-2">
+                                    </button>
+
+
+                                </div>
+
+                                <div class="col-md-4 mt-1">
+                                    <strong>Joint 2</strong>
+                                    <br>
+                                    <span>{{cposition.Joint2.toFixed(2)}} °</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <button @click="keyValue='s'; moveByKey()"
+                                        class="border no-border btn btn-danger Icon64  clockwiseIcon mr-2"></button>
+
+                                    <strong>S</strong>
+                                </div>
+                            </div>
+
+
+                            <hr>
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <strong>Q</strong>
+                                    <button @click="keyValue='q'; moveByKey()"
+                                        class="border no-border btn btn-warning  Icon64  counterclockwiseIcon ml-2">
+                                    </button>
+
+
+                                </div>
+
+                                <div class="col-md-4 mt-1">
+                                    <strong>Joint 3</strong>
+                                    <br>
+                                    <span>{{cposition.Joint3.toFixed(2)}} °</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <button @click="keyValue='w'; moveByKey()"
+                                        class="border no-border btn btn-danger Icon64  clockwiseIcon mr-2"></button>
+
+                                    <strong>W</strong>
+                                </div>
+                            </div>
+
+
+                            <hr>
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <strong>N</strong>
+                                    <button @click="keyValue='n'; moveByKey()"
+                                        class="border no-border btn btn-warning  Icon64  counterclockwiseIcon ml-2">
+                                    </button>
+
+
+                                </div>
+
+                                <div class="col-md-4 mt-1">
+                                    <strong>Joint 4</strong>
+                                    <br>
+                                    <span>{{cposition.Joint4.toFixed(2)}} °</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <button @click="keyValue='m'; moveByKey()"
+                                        class="border no-border btn btn-danger Icon64  clockwiseIcon mr-2"></button>
+
+                                    <strong>M</strong>
+                                </div>
+                            </div>
+
+
+                            <hr>
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <strong>K</strong>
+                                    <button @click="keyValue='k'; moveByKey()"
+                                        class="border no-border btn btn-warning  Icon64  counterclockwiseIcon ml-2">
+                                    </button>
+
+
+                                </div>
+
+                                <div class="col-md-4 mt-1">
+                                    <strong>Joint 5</strong>
+                                    <br>
+                                    <span>{{cposition.Joint5.toFixed(2)}} °</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <button @click="keyValue='l'; moveByKey()"
+                                        class="border no-border btn btn-danger Icon64  clockwiseIcon mr-2"></button>
+
+                                    <strong>L</strong>
+                                </div>
+                            </div>
+
+
+                            <hr>
+                            <div class="row text-center ">
+                                <div class="col-md-4">
+                                    <strong>O</strong>
+                                    <button @click="keyValue='o'; moveByKey()"
+                                        class="border no-border btn btn-warning  Icon64  counterclockwiseIcon ml-2">
+                                    </button>
+                                </div>
+
+                                <div class="col-md-4 mt-1">
+                                    <strong>Joint 6</strong>
+                                    <br>
+                                    <span>{{cposition.Joint6.toFixed(2)}} °</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <button @click="keyValue='p'; moveByKey()"
+                                        class="border no-border btn btn-danger Icon64  clockwiseIcon mr-2"></button>
+                                    <strong>P</strong>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade row" id="myModalkeyboardrun2">
+            <div class="modal-dialog modal-md">
+                <div class="modal-content">
+
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h4 class="modal-title">Move</h4>
+                        <button type="button" class="close" data-dismiss="modal">×</button>
+                    </div>
+
+                    <!-- Modal body -->
+                    <div class="modal-body" v-on:keydown="getKey">
+                        <div class=" text-center">
+                            <div class="row text-center">
+                                <div class="col-md-4 text-left">
+                                    <strong>Increse Size: </strong>{{increasSize}} m
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="range" min="0.01" v-model="increasSize" max="1" value="0.1"
+                                        class="slider mt-2" step="0.01" />
+                                </div>
+                            </div>
+                            <div class="row text-center mt-2">
+                                <div class="col-md-4 text-left">
+                                    <strong> Select Link:</strong>
+                                </div>
+                                <div class="form-check col-md-4">
+
+                                    <input type="radio" id="one" value="arm_link" v-model="selectedlink" />
+                                    &nbsp; <label for="one">Arm Link</label>
+                                </div>
+                                <div class="form-check  col-md-4">
+                                    <input type="radio" id="two" value="j6_Link" v-model="selectedlink" />
+                                    &nbsp; <label for="two">J6 Link</label>
+                                </div>
+
+                                <!-- <div class="col-md-2"></ّdiv> -->
+                            </div>
+                            <hr>
+                            <div class="row text-center ">
+                                <div class="col-md-4">
+                                    <strong> X-AXIS</strong>
+                                </div>
+                                <div class="col-md-4">
+                                    <button @click="keyValue='ArrowUp'; moveByKey()"
+                                        class="border no-border btn btn-warning  Icon64  arrowUpIcon ml-2">
+                                    </button>
+
+
+                                </div>
+
+                                <!-- <div class="col-md-4 mt-1">
+                                    <strong>Joint 1</strong>
+                                    <br>
+                                    <span>{{cposition.Joint1}} °</span>
+                                </div> -->
+                                <div class="col-md-4">
+                                    <button @click="keyValue='ArrowDown'; moveByKey()"
+                                        class="border no-border btn btn-danger Icon64  arrowDownIcon mr-2"></button>
+
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <strong> Y-AXIS</strong>
+                                </div>
+                                <div class="col-md-4">
+                                    <button @click="keyValue='ArrowLeft'; moveByKey()"
+                                        class="border no-border btn btn-warning  Icon64  arrowLeftIcon ml-2">
+                                    </button>
+
+
+                                </div>
+
+                                <!-- <div class="col-md-4 mt-1">
+                                    <strong>Joint 2</strong>
+                                    <br>
+                                    <span>{{cposition.Joint2}} °</span>
+                                </div> -->
+                                <div class="col-md-4">
+                                    <button @click="keyValue='ArrowRight'; moveByKey()"
+                                        class="border no-border btn btn-danger Icon64  arrowRightIcon mr-2"></button>
+
+                                </div>
+                            </div>
+
+
+                            <hr>
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <strong> Z-AXIS</strong>
+                                </div>
+                                <div class="col-md-4">
+                                    <button @click="keyValue='-'; moveByKey()"
+                                        class="border no-border btn btn-warning  Icon64   ml-2">-
+                                    </button>
+
+
+                                </div>
+
+                                <!-- <div class="col-md-4 mt-1">
+                                    <strong>Joint 3</strong>
+                                    <br>
+                                    <span>{{cposition.Joint3}} °</span>
+                                </div> -->
+                                <div class="col-md-4">
+                                    <button @click="keyValue='+'; moveByKey()"
+                                        class="border no-border btn btn-danger Icon64  plusIcon mr-2"></button>
+
+                                </div>
+                            </div>
+
+
+
+
+
+                        </div>
+                    </div>
+
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+    <input type="file" id="file-input" hidden />
+    <pre id="file-content" hidden></pre>
+
+    <!-- <script>
+        $(document).on("click", ".callModal", function () {
+            var temp = $(this).data('name');
+            let data = JSON.parse(localStorage.getItem(temp));
+            console.log(temp)
+            localStorage.setItem('store', JSON.stringify(data));
+           
+            console.log(data)
+        });
+    </script> -->
+
+
+    <script src="script/vue.global.js"></script>
+    <script type="text/javascript">
+        // <script type="text/javascript">
+        // We could have loaded main.js simply with:
+        //  <script type="text/javascript" src="main.js">
+        //
+        // BUT we were having caching-related problems.
+        // Loading main.js with a Date.now() in the URL we avoid using cache
+
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = 'script/main.js?v=4.' + Date.now();
+        document.head.appendChild(script);
+
+
+    </script>
+
+
+
+    <script>
+
+
+        var row;
+
+        function start() {
+            row = event.target;
+        }
+        function dragover(tablename) {
+            var e = event;
+            e.preventDefault();
+
+            let children = Array.from(e.target.parentNode.parentNode.children);
+
+            let children_index = children.indexOf(e.target.parentNode)
+            let row_index = children.indexOf(row)
+            // try {
+            if (children_index > row_index)
+                e.target.parentNode.after(row);
+            else
+                e.target.parentNode.before(row);
+
+            if (children_index != row_index) {
+                // console.log(children_index);
+                console.log(row);
+
+
+                newdata = tableToJson(document.getElementById(tablename));
+                // let dd= "{test:" + {newdata} +"}";
+                console.log(newdata)
+
+
+                let cattitle = document.getElementById('catTitle1').value;
+                console.log(cattitle)
+                localStorage.setItem(cattitle, JSON.stringify(newdata));
+
+
+
+
+            }
+            // }
+            // catch (err) {
+            //     console.log("fault")
+            // }
+
+        }
+
+
+        function DownButton(element, tablename) {
+
+            let row_index = element.parentNode.parentNode.rowIndex
+
+            moveActiveRow(row_index, 1, tablename)
+
+
+            newdata = tableToJson(document.getElementById(tablename));
+
+            let cattitle = document.getElementById('catTitle1').value;
+            console.log(cattitle)
+            localStorage.setItem(cattitle, JSON.stringify(newdata));
+
+
+
+
+        }
+
+
+
+        function UpButton(element, tablename) {
+
+            let row_index = element.parentNode.parentNode.rowIndex
+
+
+
+            if (row_index > 1)
+                moveActiveRow(row_index, -1, tablename)
+            newdata = tableToJson(document.getElementById(tablename));
+
+            let cattitle = document.getElementById('catTitle1').value;
+            //console.log(cattitle)
+            localStorage.setItem(cattitle, JSON.stringify(newdata));
+
+
+
+        }
+
+        function moveActiveRow(activeRow, move, tablename) {
+            var rows = document.getElementById(tablename).rows;
+            console.log(rows[activeRow])
+            var oldRow = rows[activeRow].innerHTML;
+            var newRow = rows[activeRow + move].innerHTML;
+            rows[activeRow].innerHTML = newRow;
+            rows[activeRow + move].innerHTML = oldRow;
+        }
+
+        function deleteActiveRow(element, tablename) {
+
+            let row_index = element.parentNode.parentNode.rowIndex
+
+
+
+            if (row_index > 0)
+                var rows = document.getElementById(tablename).deleteRow(row_index);;
+
+            newdata = tableToJson(document.getElementById(tablename));
+
+            let cattitle = document.getElementById('catTitle1').value;
+            //console.log(cattitle)
+            localStorage.setItem(cattitle, JSON.stringify(newdata));
+
+        }
+
+
+
+        function dragover2(tablename) {
+            var e = event;
+            e.preventDefault();
+
+            let children = Array.from(e.target.parentNode.parentNode.children);
+
+            let children_index = children.indexOf(e.target.parentNode)
+            let row_index = children.indexOf(row)
+            // try {
+            if (children_index > row_index)
+                e.target.parentNode.after(row);
+            else
+                e.target.parentNode.before(row);
+
+            if (children_index != row_index) {
+                // console.log(children_index);
+                // console.log(row_index);
+
+
+                newdata = tableToJson2(document.getElementById(tablename));
+                // let dd= "{test:" + {newdata} +"}";
+                console.log(newdata)
+
+
+                localStorage.setItem('catlist', JSON.stringify(newdata));
+
+
+            }
+            // }
+            // catch (err) {
+            //     console.log("fault")
+            // }
+
+        }
+
+        function tableToJson2(table) {
+            var data = [];
+
+            // first row needs to be headers
+            var headers = [];
+            for (var i = 1; i < table.rows[0].cells.length - 1; i++) {
+                headers[i] = table.rows[0].cells[i].innerHTML.toLowerCase().replace(/ /gi, '');
+            }
+
+            // go through cells
+
+            for (var i = 1; i < table.rows.length; i++) {
+
+                var tableRow = table.rows[i];
+                var rowData = {};
+
+                for (var j = 1; j < tableRow.cells.length - 1; j++) {
+
+                    rowData[headers[j]] = tableRow.cells[j].innerHTML;
+
+                }
+
+                data.push(rowData);
+            }
+            return data;
+        }
+        function nestedtableToJson(table) {
+            var data = [];
+
+            // first row needs to be headers
+            var headers = [];
+            for (var i = 0; i < table.rows[0].cells.length; i++) {
+                headers[i] = table.rows[0].cells[i].innerHTML.toLowerCase().replace(/ /gi, '');
+            }
+
+            // go through cells
+
+            for (var i = 1; i < table.rows.length; i++) {
+
+                var tableRow = table.rows[i];
+                var rowData = {};
+
+                for (var j = 0; j < tableRow.cells.length; j++) {
+
+                    rowData[headers[j]] = tableRow.cells[j].innerHTML;
+
+                }
+
+                data.push(rowData);
+            }
+            return data;
+        }
+
+
+        function tableToJson(table) {
+            var data = [];
+
+            // first row needs to be headers
+            var headers = [];
+            for (var i = 1; i < table.rows[0].cells.length - 1; i++) {
+                headers[i] = table.rows[0].cells[i].innerHTML.toLowerCase().replace(/ /gi, '');
+            }
+
+            // go through cells
+
+            for (var i = 1; i < table.rows.length; i++) {
+
+                var tableRow = table.rows[i];
+                var rowData = {};
+
+                // for (var j = 1; j < tableRow.cells.length - 1; j++) {
+
+                //     rowData[headers[j]] = tableRow.cells[j].innerHTML;
+
+                // }
+
+                rowData["type"] = tableRow.cells[1].innerHTML;
+
+
+                var temp = {};
+                let value = tableRow.cells[2].innerHTML
+                <!-- // console.log(value) -->
+                switch (tableRow.cells[1].innerHTML) {
+                    case "Arm Angles":
+                    case "Arm Coordinates":
+                        // const myArray = value.split("::");               
+                        // temp["title"]  = myArray[0];
+                        // temp["joint1"] = myArray[1];
+                        // temp["joint2"] = myArray[2];
+                        // temp["joint3"] = myArray[3];
+                        // temp["joint4"] = myArray[4];
+                        // temp["joint5"] = myArray[5];
+                        // temp["joint6"] = myArray[6];
+                        // temp["speed"]  = myArray[7];
+                        // temp["delay"]  = myArray[8];
+                        // console.log(value);
+
+                        const htmlStr = value;
+
+                        // make a new parser
+                        const parser = new DOMParser();
+
+                        // convert html string into DOM
+                        const doc = parser.parseFromString(htmlStr, "text/html");
+
+                        // console.log(doc.getElementById("nestedtable"));
+                        let data = nestedtableToJson(doc.getElementById("nestedtable"));
+                        //console.log(data);
+                        rowData["value"] = data[0];
+                        break;
+               
+
+                       
+                    case "LED":
+                        temp["reapet"] = value;
+                        rowData["value"] = temp;
+                        break;
+                    case "Buzzer":
+                        temp["reapet"] = value;
+                        rowData["value"] = temp;
+                        break;
+                    case "Hand":
+                        let text = value.split(" - ");
+                        temp["actuator"] = text[0];
+                        temp["action"] = text[1];
+                        rowData["value"] = temp;
+                        break;
+                }
+
+                data.push(rowData);
+            }
+            return data;
+        }
+
+
+        function saveWorkspace() {
+            let cattitle = document.getElementById('catTitle1').value;
+            console.log(cattitle)
+            // const content = JSON.stringify(Blockly.serialization.workspaces.save(Blockly.getMainWorkspace()));
+            const content = localStorage.getItem(cattitle);
+            console.log(content);
+            try {
+                const link = document.createElement("a");
+                const file = new Blob([content], { type: 'text/plain' });
+                link.href = URL.createObjectURL(file);
+                // let cattitle = document.getElementById('catTitle1').value;
+                link.download = cattitle + ".json";
+                link.click();
+                URL.revokeObjectURL(link.href);
+
+            } catch (e) {
+                // Storage can be flakey.
+                console.log(e);
+
+            }
+        }
+
+
+        function readSingleFile(e) {
+            var file = e.target.files[0];
+            if (!file) {
+                return;
+            }
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var contents = e.target.result;
+                displayContents(contents);
+            };
+            reader.readAsText(file);
+        }
+
+        function displayContents(contents) {
+            var element = document.getElementById('file-content');
+            element.textContent = contents;
+        }
+
+        document.getElementById('file-input')
+            .addEventListener('change', readSingleFile, false); function readSingleFile(e) {
+                var file = e.target.files[0];
+                const filename = file.name.split('.').slice(0, -1).join('.')
+                console.log("file name:" + filename);
+                if (!file) {
+                    return;
+                }
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var contents = e.target.result;
+
+                    displayContents(contents);
+
+
+                    let cattitle = document.getElementById('catTitle1');
+                    cattitle.value = filename;
+                    var element = document.getElementById('file-content');
+                    var contents = element.textContent;
+
+                    //console.log(contents);
+                    const newdata = JSON.parse(contents);
+
+                    localStorage.setItem(filename, JSON.stringify(newdata));
+
+                };
+                reader.readAsText(file);
+            }
+
+        function displayContents(contents) {
+            var element = document.getElementById('file-content');
+            element.textContent = contents;
+        }
+        document.getElementById('file-input')
+            .addEventListener('change', readSingleFile, false);
+
+
+
+
+    </script>
+
+
+</body>
+
+</html>
