@@ -91,7 +91,7 @@
 </head>
 
 <body>
-    <div id="app" class="container mt-4">
+    <div id="app" class="container mt-4 p-0">
         <div class="row">
             <div class="col-md-3 ">
                 <div class="card">
@@ -100,8 +100,9 @@
                         <b>ARO Robotic Systems</b>
                     </div>
                     <div class="card-body">
-                        <h5>ROSBridge & Vue Js</h5>
-                        <label>ROSBridge address</label>
+                        <!-- <h5>ROSBridge & Vue Js</h5> -->
+                        <!-- <label>ROSBridge Address</label> -->
+                        <label>Web Socket Address</label>
                         <br />
                         <input type="text" v-model="rosbridge_address" class="form-control"
                             value="ws://127.0.0.1:9090/" />
@@ -111,7 +112,7 @@
                         <button class="mt-2 btn btn-primary" v-else @click="connect">Connect!</button>
                         <div class="font-weight-light mt-1">
                             <div style="color: #ff0000;" v-show="error">Error in the backend!</div>
-                            <div v-show="!connected">Connection closed.</div>
+                            <div v-show="!connected" class="text text-danger">Connection closed.</div>
                         </div>
                     </div>
                 </div>
@@ -205,19 +206,19 @@
                                                 <div class="col-md-6 col-sm-8 text-right">
 
                                                     <button @click="currentPosition"
-                                                        class="btn btn-sm   btn-success ml-2 Icon32 resetIcon">
+                                                        class="btn btn-sm   btn-success ml-2 Icon48 resetIcon">
                                                     </button>
-                                                    <button class="btn btn-sm  btn-primary ml-2 Icon32 keyboardIcon"
+                                                    <button class="btn btn-sm  btn-primary ml-2 Icon48 keyboardIcon"
                                                         v-on:keydown="getKey" data-toggle="modal"
                                                         data-target="#myModalkeyboardrun" title="Active Keyboard"
                                                         @click="Jogging_Command(0)">
                                                     </button>
-                                                    <button class="btn btn-sm  btn-danger ml-2 Icon32 joystickIcon"
+                                                    <button class="btn btn-sm  btn-danger ml-2 Icon48 joystickIcon"
                                                         v-on:keydown="getKey" data-toggle="modal"
                                                         data-target="#myModalkeyboardrun2" title="Active Keyboard"
                                                         @click="Jogging_Command(1)">
                                                     </button>
-                                                    <button class="btn btn-sm  btn-info ml-2 Icon32 helpIcon"
+                                                    <button class="btn btn-sm  btn-info ml-2 Icon48 helpIcon"
                                                         data-toggle="modal" data-target="#myModalkeyboard">
 
 
