@@ -121,8 +121,8 @@
                         <b>Menu</b>
                     </div>
                     <div class="card-body">
-                        <label class="btn btn-link" @click="config=true ">Make Operations</label>
-                        <label class="btn btn-link" @click="config=false">Run Operations</label>
+                        <label class="btn btn-info" @click="config=true ">Make Operations</label>
+                        <label class="btn btn-info" @click="config=false">Run Operations</label>
                     </div>
                 </div>
 
@@ -139,7 +139,7 @@
 
                         <hr>
                         <ul>
-                            <li v-for="(x,index) in cpositionxyz">{{index}}: {{x.toFixed(2)}} m </li>
+                            <li v-for="(x,index) in cpositionxyz">Axis {{index.toUpperCase()}}: {{x.toFixed(2)}} m </li>
                         </ul>
                     </div>
 
@@ -682,14 +682,14 @@
                                                     <!-- @click="Delete(index)" -->
                                                     <button
                                                         onclick="deleteActiveRow(this,'storedata')"
-                                                        class="btn btn-sm btn-danger Icon32 deleteIcon"></button>
+                                                        class="btn btn-sm btn-danger Icon40 deleteIcon"></button>
                                                     <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
 
                                                     <button onclick="UpButton(this,'storedata')"
-                                                        class="btn btn-sm btn-info  Icon32 upIcon"></button>
+                                                        class="btn btn-sm btn-info  Icon40 upIcon"></button>
                                                     <span>&nbsp;&nbsp;</span>
                                                     <button onclick="DownButton(this,'storedata')"
-                                                        class="btn btn-sm btn-info  Icon32 downIcon">
+                                                        class="btn btn-sm btn-info  Icon40 downIcon">
                                                     </button>
                                                 </td>
                                             </tr>
@@ -813,11 +813,11 @@
 
 
                                                 <button @click="DeleteFromCatList(index)"
-                                                    class="btn btn-sm btn-danger Icon32 deleteIcon"></button>
+                                                    class="btn btn-sm btn-danger Icon40 deleteIcon"></button>
 
                                                 <button data-name="action" data-toggle="modal" data-target="#myModal"
                                                     @click="modal(x.name)"
-                                                    class="callModal btn btn-sm btn-info ml-1 Icon32 listIcon"></button>
+                                                    class="callModal btn btn-sm btn-info ml-3 Icon40 listIcon"></button>
                                             </td>
                                         </tr>
                                     </tbody>
