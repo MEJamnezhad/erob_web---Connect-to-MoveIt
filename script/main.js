@@ -248,9 +248,9 @@ const app = Vue.createApp({
             };
 
             console.log(command[pos])
-            while (command[pos].type == "Arm") {
+            while (command[pos].type.includes("Arm") == true) {
                 // if (this.ArmRunning == false) {
-                this.sendWithTarget(command[pos].value)
+                this.sendWithTarget(command[pos].value, command[pos].type)
                 while (!this.reach(command[pos])) {
                     await this.sleep(500)
                     console.log('wait')
@@ -631,36 +631,43 @@ const app = Vue.createApp({
 
         },
 
-        sendWithTarget: function (target) {
-            var serviceCall = new ROSLIB.Service({
-                ros: this.ros,
-                name: "/arm/JointSpaceGoal",
-                serviceType: "arm_msgs/srv/JointSpaceGoal",
-            });
+        sendWithTarget: function (target, type) {
+
+            if (type == "Arm Angles") {
+                var serviceCall = new ROSLIB.Service({
+                    ros: this.ros,
+                    name: "/arm/JointSpaceGoal",
+                    serviceType: "arm_msgs/srv/JointSpaceGoal",
+                });
 
 
-            rj1 = target.joint1 * 1;
-            rj2 = target.joint2 * 1;
-            rj3 = target.joint3 * 1;
-            rj4 = target.joint4 * 1;
-            rj5 = target.joint5 * 1;
-            rj6 = target.joint6 * 1;
+                rj1 = target.joint1 * 1;
+                rj2 = target.joint2 * 1;
+                rj3 = target.joint3 * 1;
+                rj4 = target.joint4 * 1;
+                rj5 = target.joint5 * 1;
+                rj6 = target.joint6 * 1;
 
 
-            var request = new ROSLIB.ServiceRequest({
-                // name: ["j1", "j2", "j3", "j4", "j5", "j6"],
-                joint_pos_deg: [rj1, rj2, rj3, rj4, rj5, rj6],
-                speed: parseInt(this.speed),
-            });
-            console.log(request)
+                var request = new ROSLIB.ServiceRequest({
+                    // name: ["j1", "j2", "j3", "j4", "j5", "j6"],
+                    joint_pos_deg: [rj1, rj2, rj3, rj4, rj5, rj6],
+                    speed: parseInt(this.speed),
+                });
+                console.log(request)
 
 
-            serviceCall.callService(request, function (result) {
-                console.log('Result for service call on '
-                    + serviceCall.name
-                    + ': '
-                    + result);
-            });
+                serviceCall.callService(request, function (result) {
+                    console.log('Result for service call on '
+                        + serviceCall.name
+                        + ': '
+                        + result);
+                });
+            }
+            else {
+                values_Cartesian_Jogging = { x: target.axisx * 1, y: target.axisy * 1, z: target.axisz * 1 }
+                send_Cartesian_Jog(values_Cartesian_Jogging, "arm_link")
+            }
 
         },
 
