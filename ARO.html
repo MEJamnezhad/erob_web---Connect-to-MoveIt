@@ -233,7 +233,7 @@
                                             
                                             <ul class="nav nav-tabs" role="tablist">
                                                 <li class="nav-item">
-                                                    <a class="nav-link font-weight-bold text-dark active" @click="catresian=false"
+                                                    <a class="nav-link font-weight-bold text-darku active" @click="catresian=false"
                                                     data-toggle="tab" href="#angle">Angle</a>
                                                 </li>
                                                 <li class="nav-item">
@@ -348,7 +348,7 @@
                                                                     <div class="input-group-prepend">
                                                                         <span class="input-group-text">Axis X:</span>
                                                                     </div>
-                                                                    <input class="form-control mr-1" v-model="Axisx"
+                                                                    <input class="form-control mr-1" v-model="axisx"
                                                                         value="0.0" type="number" step="0.01" />m
 
                                                                 </div>
@@ -358,7 +358,7 @@
                                                                     <div class="input-group-prepend">
                                                                         <span class="input-group-text">Axis Y:</span>
                                                                     </div>
-                                                                    <input class="form-control mr-1" v-model="Axisy"
+                                                                    <input class="form-control mr-1" v-model="axisy"
                                                                         type="number" step="0.01" />m
 
                                                                 </div>
@@ -368,7 +368,7 @@
                                                                     <div class="input-group-prepend">
                                                                         <span class="input-group-text">Axis Z:</span>
                                                                     </div>
-                                                                    <input class="form-control mr-1" v-model="Axisz"
+                                                                    <input class="form-control mr-1" v-model="axisz"
                                                                         type="number" step="0.01" />m
 
                                                                 </div>
@@ -654,9 +654,9 @@
                                                         </tr>
                                                         <tr draggable="false">
                                                             <td>{{x.value.title}}</td>
-                                                            <td>{{x.value.Axisx}}</td>
-                                                            <td>{{x.value.Axisy}}</td>
-                                                            <td>{{x.value.Axisz}}</td>
+                                                            <td>{{x.value.axisx}}</td>
+                                                            <td>{{x.value.axisy}}</td>
+                                                            <td>{{x.value.axisz}}</td>
                                                             <td>{{x.value.speed}}</td>
                                                         </tr>
                                                     </table>
@@ -914,9 +914,9 @@
                                                 </tr>
                                                 <tr draggable="false">
                                                     <td>{{x.value.title}}</td>
-                                                    <td>{{x.value.Axisx}} m</td>
-                                                    <td>{{x.value.Axisy}} m</td>
-                                                    <td>{{x.value.Axisz}} m</td>
+                                                    <td>{{x.value.axisx}} m</td>
+                                                    <td>{{x.value.axisy}} m</td>
+                                                    <td>{{x.value.axisz}} m</td>
                                                     <td>{{x.value.speed}}</td>
                                                 </tr>
                                             </table>

@@ -55,9 +55,9 @@ const app = Vue.createApp({
             keyboardSpeed: 0.4,
             selectedlink: 'j6_Link',
             increasSize: 0.1,
-            Axisx: 0.0,
-            Axisy: 0.0,
-            Axisz: 0.0,
+            axisx: 0.0,
+            axisy: 0.0,
+            axisz: 0.0,
 
 
         }
@@ -450,9 +450,9 @@ const app = Vue.createApp({
             this.j5 = Math.round(this.cposition.Joint5)
             this.j6 = Math.round(this.cposition.Joint6)
 
-            this.Axisx = Math.round(this.cpositionxyz.x)
-            this.Axisy = Math.round(this.cpositionxyz.y)
-            this.Axisz = Math.round(this.cpositionxyz.z)
+            this.axisx = Math.round(this.cpositionxyz.x)
+            this.axisy = Math.round(this.cpositionxyz.y)
+            this.axisz = Math.round(this.cpositionxyz.z)
         },
 
         showPosition: function () {
@@ -623,7 +623,7 @@ const app = Vue.createApp({
                 this.Execute();
             }
             else {
-                values_Cartesian_Jogging = { x: this.Axisx * 1, y: this.Axisy * 1, z: this.Axisz * 1 }
+                values_Cartesian_Jogging = { x: this.axisx * 1, y: this.axisy * 1, z: this.axisz * 1 }
                 send_Cartesian_Jog(values_Cartesian_Jogging, "arm_link")
 
             }
@@ -925,9 +925,9 @@ const app = Vue.createApp({
                 let item = {
                     type: "Arm Coordinates",
                     value: {
-                        Axisx: this.Axisx * 1,
-                        Axisy: this.Axisy * 1,
-                        Axisz: this.Axisz * 1,
+                        axisx: this.axisx * 1,
+                        axisy: this.axisy * 1,
+                        axisz: this.axisz * 1,
 
                         speed: this.speed,
 
